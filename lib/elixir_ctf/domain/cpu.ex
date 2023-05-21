@@ -35,11 +35,14 @@ defmodule MSP430.CPU do
     if cpu.memory.pc == @int_handle_adr, do: handle_int(cpu), else: cpu
   end
 
-  @spec exec_continuously(t) :: t
-  def exec_continuously(cpu) do
+  @spec exec_continuously(t, MapSet.t(integer)) :: t
+  def exec_continuously(cpu, breakpoints \\ MapSet.new()) do
     if is_on(cpu) && !cpu.require_input do
       cpu = exec_single(cpu)
-      exec_continuously(cpu)
+
+      if MapSet.member?(breakpoints, cpu.memory.pc),
+        do: cpu,
+        else: exec_continuously(cpu, breakpoints)
     else
       cpu
     end

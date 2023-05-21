@@ -102,6 +102,9 @@ defmodule ElixirCtfWeb.LevelPlayLive do
 
     <style>
       #code-<%= Integer.to_string(@pc, 16) |> String.upcase %>{color: red; font-weight: bold;}
+      <%= for adr <- @breakpoints do %>
+      #code-<%= Integer.to_string(adr, 16) |> String.upcase %>{background: lightblue; font-weight: bold;}
+      <% end %>
     </style>
     """
   end
@@ -119,8 +122,27 @@ defmodule ElixirCtfWeb.LevelPlayLive do
   end
 
   def handle_event("run", _value, socket) do
-    cpu = CPU.exec_continuously(socket.assigns.cpu)
+    cpu = CPU.exec_continuously(socket.assigns.cpu, socket.assigns.breakpoints)
     {:noreply, update_assign_for_cpu(socket, cpu)}
+  end
+
+  def handle_event("toggle_breakpoint", value, socket) do
+    adr = Map.get(value, "address")
+
+    if adr == nil do
+      Logger.error("invalid breakpoint address")
+      {:noreply, socket}
+    else
+      address = String.to_integer(adr, 16)
+
+      breakpoints =
+        if MapSet.member?(socket.assigns.breakpoints, address),
+          do: MapSet.delete(socket.assigns.breakpoints, address),
+          else: MapSet.put(socket.assigns.breakpoints, address)
+
+      socket = assign(socket, breakpoints: breakpoints)
+      {:noreply, socket}
+    end
   end
 
   def handle_event("reset", _value, socket) do
@@ -146,10 +168,13 @@ defmodule ElixirCtfWeb.LevelPlayLive do
         {line, adr}
       end)
 
+    breakpoints = Map.get(socket.assigns, :breakpoints, MapSet.new())
+
     socket =
       assign(socket,
         level: level,
-        objdump: objdump
+        objdump: objdump,
+        breakpoints: breakpoints
       )
 
     socket = update_assign_for_cpu(socket, cpu)

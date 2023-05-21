@@ -35,6 +35,7 @@ defmodule ElixirCtfWeb.CPUComponents do
         <pre
           id={"code-#{@adr}"}
           style="tab-size: 8;"
+          phx-click="toggle_breakpoint"
           phx-value-address={@adr}
         ><%= @code %></pre>
       <% true -> %>
