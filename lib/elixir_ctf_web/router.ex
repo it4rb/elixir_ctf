@@ -18,6 +18,7 @@ defmodule ElixirCtfWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    resources "/levels", LevelController
   end
 
   # Other scopes may use custom stacks.

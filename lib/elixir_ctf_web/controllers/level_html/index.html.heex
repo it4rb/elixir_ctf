@@ -1,0 +1,30 @@
+<.header>
+  Listing Levels
+</.header>
+
+<div class="mt-11">
+  <details :for={{level, i} <- Enum.with_index(@levels)} class="rounded-lg">
+    <summary class={"flex w-full p-3 cursor-pointer list-none border-gray-200 hover:bg-gray-100 border-b #{if i == 0, do: "border-t", else: ""}"}>
+      <span><%= level.title %></span>
+      <div class="ml-auto">
+        <span class="bg-green-100 text-green-800 mr-2 px-2.5 py-0.5 rounded">
+          <%= level.score %> point<%= if level.score > 1, do: "s", else: "" %>
+        </span>
+        <.link class="mb-5 bg-gray-300 px-2 py-1 rounded" href={~p"/levels/#{level}/play"}>
+          Launch
+        </.link>
+      </div>
+    </summary>
+    <div class="p-5 border-b border-gray-200">
+      <p class="">
+        <%= for line <- String.split(level.description, ~r{\n}) do %>
+          <%= line %><br />
+        <% end %>
+        <details :if={level.hint != nil} class="mt-5 rounded-lg">
+          <summary>Hint</summary>
+          <span><%= level.hint %></span>
+        </details>
+      </p>
+    </div>
+  </details>
+</div>
