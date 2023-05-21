@@ -135,4 +135,17 @@ defmodule MSP430.AdrModeTest do
              ins_cnt: 1
            }
   end
+
+  test "byte mode 1" do
+    mem = %Memory{sr: 0, r5: 0xA28F, r6: 0x0203, ram: TU.load_ram(%{0x0202 => 0x01201})}
+    nmem = CPU.exec_ins(mem, {:add, {:register, 5}, {:indexed, 6, 0}, true})
+    assert nmem == %{mem | sr: 4, ram: TU.load_ram(%{0x0202 => 0x0A101})}
+  end
+
+  test "byte mode 2" do
+    mem = %Memory{sr: 0xFFFF, r5: 0x01202, r6: 0x0223, ram: TU.load_ram(%{0x0222 => 0x05F01})}
+    nmem = CPU.exec_ins(mem, {:add, {:indirect_register, 6}, {:register, 5}, true})
+    # all flags get reset
+    assert nmem == %{mem | sr: 0xFFFF - (256 + 4 + 2 + 1), r5: 0x00061}
+  end
 end

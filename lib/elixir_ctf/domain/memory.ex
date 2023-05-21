@@ -251,4 +251,41 @@ defmodule MSP430.Memory do
   def rom_start, do: @rom_start
   @spec reset_addr :: integer()
   def reset_addr, do: @reset_addr
+
+  @spec set_flag(t, map()) :: t
+  def set_flag(mem, flags) do
+    sr =
+      Map.to_list(flags)
+      |> List.foldl(mem.sr, fn {k, v}, sr ->
+        if v == 0 do
+          mask =
+            case k do
+              :v -> 0b1111111011111111
+              :n -> 0b1111111111111011
+              :z -> 0b1111111111111101
+              :c -> 0b1111111111111110
+            end
+
+          sr &&& mask
+        else
+          mask =
+            case k do
+              :v -> 0b0000000100000000
+              :n -> 0b0000000000000100
+              :z -> 0b0000000000000010
+              :c -> 0b0000000000000001
+            end
+
+          sr ||| mask
+        end
+      end)
+
+    %{mem | sr: sr}
+  end
+
+  @spec get_flag(t) :: [{:v, 0..1} | {:n, 0..1} | {:z, 0..1} | {:c, 0..1}]
+  def get_flag(mem) do
+    <<_::7, v::1, _::5, n::1, z::1, c::1>> = <<mem.sr::16>>
+    [v: v, n: n, z: z, c: c]
+  end
 end
