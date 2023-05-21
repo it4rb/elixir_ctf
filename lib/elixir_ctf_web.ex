@@ -85,6 +85,7 @@ defmodule ElixirCtfWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import ElixirCtfWeb.CoreComponents
+      import ElixirCtfWeb.CPUComponents
       import ElixirCtfWeb.Gettext
 
       # Shortcut for generating JS commands

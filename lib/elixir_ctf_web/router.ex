@@ -19,6 +19,7 @@ defmodule ElixirCtfWeb.Router do
 
     get "/", PageController, :home
     resources "/levels", LevelController
+    live "/levels/:id/play", LevelPlayLive
   end
 
   # Other scopes may use custom stacks.

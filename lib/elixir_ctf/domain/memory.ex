@@ -311,4 +311,34 @@ defmodule MSP430.Memory do
     <<_::7, v::1, _::5, n::1, z::1, c::1>> = <<mem.sr::16>>
     [v: v, n: n, z: z, c: c]
   end
+
+  @spec dump_ram(t, integer()) :: list
+  def dump_ram(mem, word_block_size) do
+    dump_map(mem.ram, @ram_start, @ram_size, word_block_size)
+  end
+
+  @spec dump_rom(t, integer()) :: list
+  def dump_rom(mem, word_block_size) do
+    dump_map(mem.rom, @rom_start, @rom_size, word_block_size)
+  end
+
+  defp dump_map(map, start, word_size, word_block_size) do
+    Range.new(0, word_size - word_block_size, word_block_size)
+    |> Enum.map(fn block_start ->
+      block =
+        Range.new(0, word_block_size - 1)
+        |> Enum.map(fn offset -> Map.get(map, block_start + offset, 0) end)
+
+      {2 * block_start + start, block}
+    end)
+    |> Enum.reduce({[], nil, nil}, fn {block_start, block}, {blocks, prev2, prev1} ->
+      cond do
+        prev1 == [] and prev2 == block -> {blocks, prev2, prev1}
+        prev1 != [] and prev1 == block -> {[{block_start, []} | blocks], prev1, []}
+        true -> {[{block_start, block} | blocks], prev1, block}
+      end
+    end)
+    |> elem(0)
+    |> Enum.reverse()
+  end
 end

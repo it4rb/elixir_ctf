@@ -1,5 +1,5 @@
 defmodule MSP430.IntelHex do
-  @spec load(list(String.t()), integer) :: {:ok, Map} | {:error, String.t()}
+  @spec load(list(String.t()), integer) :: {:ok, map()} | {:error, String.t()}
   def load(records, mem_offset) do
     case traverse(records, &parse/1) do
       {:error, msg} ->
