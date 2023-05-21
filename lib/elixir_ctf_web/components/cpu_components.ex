@@ -1,5 +1,6 @@
 defmodule ElixirCtfWeb.CPUComponents do
   use Phoenix.Component
+  import ElixirCtfWeb.CoreComponents
 
   @doc """
   Renders a box.
@@ -90,4 +91,25 @@ defmodule ElixirCtfWeb.CPUComponents do
     c2 = if b2 >= 32 and b2 <= 126, do: <<b2::8>>, else: '.'
     [c2, c1]
   end
+
+  @doc """
+  Renders the control panel.
+  """
+  attr(:cpu_on, :boolean)
+
+  def control_panel(assigns) do
+    ~H"""
+    <div>
+      <.button phx-click="step" disabled={!@cpu_on} title={step_tooltip(@cpu_on)}>Step</.button>
+      <.button phx-click="run" disabled={!@cpu_on} title={run_tooltip(@cpu_on)}>Run</.button>
+      <.button phx-click="reset" title="Reset the CPU">Reset</.button>
+    </div>
+    """
+  end
+
+  @reset_text "CPU is OFF, hit Reset to continue"
+  @step_text "Step one instruction"
+  @run_text "Run continuously until CPU off or input required"
+  defp step_tooltip(cpu_on), do: if(cpu_on, do: @step_text, else: @reset_text)
+  defp run_tooltip(cpu_on), do: if(cpu_on, do: @run_text, else: @reset_text)
 end

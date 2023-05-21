@@ -92,6 +92,8 @@ defmodule ElixirCtfWeb.LevelPlayLive do
           <pre><%= @cpu.stdout %></pre>
         </.box>
 
+        <.control_panel cpu_on={@cpu_on} />
+
         <.box id="ram" title="RAM" class="overflow-auto">
           <.dataline :for={{adr, words} <- @ram_dump} adr={adr} words={words} />
         </.box>
@@ -105,6 +107,23 @@ defmodule ElixirCtfWeb.LevelPlayLive do
 
     level = Level.get_level!(id)
     {:ok, setup_for_level(socket, level)}
+  end
+
+  def handle_event("step", _value, socket) do
+    cpu = CPU.exec_single(socket.assigns.cpu)
+    {:noreply, update_assign_for_cpu(socket, cpu)}
+  end
+
+  def handle_event("run", _value, socket) do
+    cpu = CPU.exec_continuously(socket.assigns.cpu)
+    {:noreply, update_assign_for_cpu(socket, cpu)}
+  end
+
+  def handle_event("reset", _value, socket) do
+    id = socket.assigns.level.id
+
+    level = Level.get_level!(id)
+    {:noreply, setup_for_level(socket, level)}
   end
 
   defp setup_for_level(socket, level) do
