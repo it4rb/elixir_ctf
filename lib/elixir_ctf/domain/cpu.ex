@@ -378,6 +378,27 @@ defmodule MSP430.CPU do
         # Interface with deadbolt to trigger an unlock if the password is correct.
         # Takes no arguments.
         %{cpu | unlocked: true}
+
+      0x7D ->
+        # Interface with the HSM-1. Set a flag in memory if the password passed in is correct.
+        # Takes two arguments. The first argument is the password to test, the
+        # second is the location of a flag to overwrite if the password is correct.
+        {_, flag_adr} = Memory.read_word(cpu.memory, {:indexed, 1, 6})
+        # always set password checking result flag to 0
+        %{cpu | memory: Memory.write_word(cpu.memory, {:absolute, flag_adr}, 0)}
+
+      0x7E ->
+        # Interface with the HSM-2. Trigger the deadbolt unlock if the password is correct.
+        # Takes two arguments similar to 0x7D above, however the flag is for information only,
+        # the CPU should never use it to conditionally unlock the door.
+
+        {_, flag_adr} = Memory.read_word(cpu.memory, {:indexed, 1, 6})
+        # always set password checking result flag to 0
+        %{cpu | memory: Memory.write_word(cpu.memory, {:absolute, flag_adr}, 0)}
+
+      _ ->
+        Logger.warn(unknown_interrupt: int_type)
+        cpu
     end
   end
 end

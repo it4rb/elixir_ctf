@@ -1,0 +1,6 @@
+{
+  "title": "HSM-2",
+  "description": "The HSM-1 module has been upgraded to HSM-2, which interfaces with the lock directly. Now the CPU only need to send password to HSM-2 and it will do all the checking/unlocking itself. The unlock function has been removed from CPU source code.",
+  "hint": "Do you remember how the unlock function worked?",
+  "score": 12
+}

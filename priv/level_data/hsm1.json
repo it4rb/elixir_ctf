@@ -1,0 +1,6 @@
+{
+  "title": "HSM-1",
+  "description": "The CPU no longer do the check for password validity. Instead, it will call to an external HSM-1 module to perform the check there. The HSM-1 module will communicate the result back by setting a flag in memory.",
+  "hint": "This is a classic stack overflow bug, try looking for a vulnerable buffer.",
+  "score": 10
+}

@@ -1,0 +1,149 @@
+
+/tmp/hsm1.c.elf:     file format elf32-msp430
+
+
+Disassembly of section int_section:
+
+0000ff00 <INT>:
+    ff00:	30 41       	ret			
+
+Disassembly of section .text:
+
+0000c000 <__watchdog_support>:
+    c000:	55 42 20 01 	mov.b	&0x0120,r5	
+    c004:	35 d0 08 5a 	bis	#23048,	r5	;#0x5a08
+    c008:	82 45 00 02 	mov	r5,	&0x0200	
+
+0000c00c <__init_stack>:
+    c00c:	31 40 00 04 	mov	#1024,	r1	;#0x0400
+
+0000c010 <__do_copy_data>:
+    c010:	3f 40 00 00 	mov	#0,	r15	;#0x0000
+    c014:	0f 93       	tst	r15		
+    c016:	08 24       	jz	$+18     	;abs 0xc028
+    c018:	92 42 00 02 	mov	&0x0200,&0x0120	
+    c01c:	20 01 
+    c01e:	2f 83       	decd	r15		
+    c020:	9f 4f 70 c1 	mov	-16016(r15),512(r15);0xc170(r15), 0x0200(r15)
+    c024:	00 02 
+    c026:	f8 23       	jnz	$-14     	;abs 0xc018
+
+0000c028 <__do_clear_bss>:
+    c028:	3f 40 00 00 	mov	#0,	r15	;#0x0000
+    c02c:	0f 93       	tst	r15		
+    c02e:	07 24       	jz	$+16     	;abs 0xc03e
+    c030:	92 42 00 02 	mov	&0x0200,&0x0120	
+    c034:	20 01 
+    c036:	1f 83       	dec	r15		
+    c038:	cf 43 00 02 	mov.b	#0,	512(r15);r3 As==00, 0x0200(r15)
+    c03c:	f9 23       	jnz	$-12     	;abs 0xc030
+
+0000c03e <main>:
+    c03e:	04 41       	mov	r1,	r4	
+    c040:	24 53       	incd	r4		
+    c042:	b0 12 52 c0 	call	#0xc052	
+    c046:	0f 43       	clr	r15		
+
+0000c048 <__stop_progExec__>:
+    c048:	32 d0 f0 00 	bis	#240,	r2	;#0x00f0
+    c04c:	fd 3f       	jmp	$-4      	;abs 0xc048
+
+0000c04e <__ctors_end>:
+    c04e:	30 40 22 c1 	br	#0xc122	
+
+0000c052 <login>:
+    c052:	04 12       	push	r4		
+    c054:	04 41       	mov	r1,	r4	
+    c056:	24 53       	incd	r4		
+    c058:	31 50 f6 ff 	add	#-10,	r1	;#0xfff6
+    c05c:	3f 40 24 c1 	mov	#-16092,r15	;#0xc124
+    c060:	b0 12 f6 c0 	call	#0xc0f6	
+    c064:	3e 40 14 00 	mov	#20,	r14	;#0x0014
+    c068:	0f 44       	mov	r4,	r15	
+    c06a:	3f 50 f4 ff 	add	#-12,	r15	;#0xfff4
+    c06e:	b0 12 9e c0 	call	#0xc09e	
+    c072:	0f 44       	mov	r4,	r15	
+    c074:	3f 50 f4 ff 	add	#-12,	r15	;#0xfff4
+    c078:	b0 12 ce c0 	call	#0xc0ce	
+    c07c:	0f 93       	tst	r15		
+    c07e:	07 24       	jz	$+16     	;abs 0xc08e
+    c080:	b0 12 c2 c0 	call	#0xc0c2	
+    c084:	3f 40 43 c1 	mov	#-16061,r15	;#0xc143
+    c088:	b0 12 f6 c0 	call	#0xc0f6	
+    c08c:	04 3c       	jmp	$+10     	;abs 0xc096
+    c08e:	3f 40 53 c1 	mov	#-16045,r15	;#0xc153
+    c092:	b0 12 f6 c0 	call	#0xc0f6	
+    c096:	31 50 0a 00 	add	#10,	r1	;#0x000a
+    c09a:	34 41       	pop	r4		
+    c09c:	30 41       	ret			
+
+0000c09e <gets>:
+    c09e:	0e 12       	push	r14		
+    c0a0:	0f 12       	push	r15		
+    c0a2:	23 12       	push	#2		;r3 As==10
+    c0a4:	b0 12 00 ff 	call	#0xff00	
+    c0a8:	31 50 06 00 	add	#6,	r1	;#0x0006
+    c0ac:	30 41       	ret			
+
+0000c0ae <putchar>:
+    c0ae:	0b 12       	push	r11		
+    c0b0:	0b 4f       	mov	r15,	r11	
+    c0b2:	0f 12       	push	r15		
+    c0b4:	03 12       	push	#0		;r3 As==00
+    c0b6:	b0 12 00 ff 	call	#0xff00	
+    c0ba:	21 52       	add	#4,	r1	;r2 As==10
+    c0bc:	0f 4b       	mov	r11,	r15	
+    c0be:	3b 41       	pop	r11		
+    c0c0:	30 41       	ret			
+
+0000c0c2 <unlock_door>:
+    c0c2:	30 12 7f 00 	push	#127		;#0x007f
+    c0c6:	b0 12 00 ff 	call	#0xff00	
+    c0ca:	21 53       	incd	r1		
+    c0cc:	30 41       	ret			
+
+0000c0ce <check_password_hsm1>:
+    c0ce:	04 12       	push	r4		
+    c0d0:	04 41       	mov	r1,	r4	
+    c0d2:	24 53       	incd	r4		
+    c0d4:	21 83       	decd	r1		
+    c0d6:	84 43 fc ff 	mov	#0,	-4(r4)	;r3 As==00, 0xfffc(r4)
+    c0da:	3e 40 fc ff 	mov	#-4,	r14	;#0xfffc
+    c0de:	0e 54       	add	r4,	r14	
+    c0e0:	0e 12       	push	r14		
+    c0e2:	0f 12       	push	r15		
+    c0e4:	30 12 7d 00 	push	#125		;#0x007d
+    c0e8:	b0 12 00 ff 	call	#0xff00	
+    c0ec:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
+    c0f0:	31 52       	add	#8,	r1	;r2 As==11
+    c0f2:	34 41       	pop	r4		
+    c0f4:	30 41       	ret			
+
+0000c0f6 <puts>:
+    c0f6:	0b 12       	push	r11		
+    c0f8:	0b 4f       	mov	r15,	r11	
+    c0fa:	6f 4b       	mov.b	@r11,	r15	
+    c0fc:	4f 93       	tst.b	r15		
+    c0fe:	06 24       	jz	$+14     	;abs 0xc10c
+    c100:	1b 53       	inc	r11		
+    c102:	8f 11       	sxt	r15		
+    c104:	b0 12 ae c0 	call	#0xc0ae	
+    c108:	0f 93       	tst	r15		
+    c10a:	f7 37       	jge	$-16     	;abs 0xc0fa
+    c10c:	cb 93 00 00 	tst.b	0(r11)		;0x0000(r11)
+    c110:	05 20       	jnz	$+12     	;abs 0xc11c
+    c112:	3f 40 0a 00 	mov	#10,	r15	;#0x000a
+    c116:	b0 12 ae c0 	call	#0xc0ae	
+    c11a:	01 3c       	jmp	$+4      	;abs 0xc11e
+    c11c:	3f 43       	mov	#-1,	r15	;r3 As==11
+    c11e:	3b 41       	pop	r11		
+    c120:	30 41       	ret			
+
+0000c122 <_unexpected_>:
+    c122:	00 13       	reti			
+
+Disassembly of section .vectors:
+
+0000ffe0 <__ivtbl_16>:
+    ffe0:	4e c0 4e c0 4e c0 4e c0 4e c0 4e c0 4e c0 4e c0     N.N.N.N.N.N.N.N.
+    fff0:	4e c0 4e c0 4e c0 4e c0 4e c0 4e c0 4e c0 00 c0     N.N.N.N.N.N.N...
