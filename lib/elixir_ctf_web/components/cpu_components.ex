@@ -94,6 +94,29 @@ defmodule ElixirCtfWeb.CPUComponents do
   end
 
   @doc """
+  Renders the modal to get user input.
+  """
+
+  def input_modal(assigns) do
+    assigns = assign(assigns, :input_form, to_form(%{}))
+
+    ~H"""
+    <.modal id="input-modal" show={true}>
+      <.form for={@input_form} phx-submit="provide_input" class="space-y-2">
+        <.input field={@input_form[:input]} label="Enter input below:" />
+        <.input
+          id="chkhex"
+          type="checkbox"
+          field={@input_form[:ishex]}
+          label="Check here if entering hex encoded input."
+        />
+        <.button phx-click={hide_modal("input-modal")}>Submit</.button>
+      </.form>
+    </.modal>
+    """
+  end
+
+  @doc """
   Renders the control panel.
   """
   attr(:cpu_on, :boolean)

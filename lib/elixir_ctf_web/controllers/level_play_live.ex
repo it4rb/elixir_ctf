@@ -100,6 +100,10 @@ defmodule ElixirCtfWeb.LevelPlayLive do
       </div>
     </div>
 
+    <%= if @cpu.require_input do %>
+      <.input_modal />
+    <% end %>
+
     <style>
       #code-<%= Integer.to_string(@pc, 16) |> String.upcase %>{color: red; font-weight: bold;}
       <%= for adr <- @breakpoints do %>
@@ -124,6 +128,27 @@ defmodule ElixirCtfWeb.LevelPlayLive do
   def handle_event("run", _value, socket) do
     cpu = CPU.exec_continuously(socket.assigns.cpu, socket.assigns.breakpoints)
     {:noreply, update_assign_for_cpu(socket, cpu)}
+  end
+
+  def handle_event("provide_input", value, socket) do
+    input = Map.get(value, "input")
+    ishex = Map.get(value, "ishex")
+
+    input =
+      if ishex == "true",
+        do: Base.decode16(input, case: :mixed),
+        else: {:ok, input}
+
+    case input do
+      {:ok, input} ->
+        cpu = CPU.provide_input(socket.assigns.cpu, input)
+
+        {:noreply, update_assign_for_cpu(socket, cpu)}
+
+      _ ->
+        Logger.error("invalid input", input: input, ishex: ishex)
+        {:noreply, socket}
+    end
   end
 
   def handle_event("toggle_breakpoint", value, socket) do

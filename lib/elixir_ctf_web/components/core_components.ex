@@ -35,6 +35,9 @@ defmodule ElixirCtfWeb.CoreComponents do
   """
   attr :id, :string, required: true
   attr :show, :boolean, default: false
+  attr :close_by_X_btn, :boolean, default: false
+  attr :close_by_clickaway, :boolean, default: false
+  attr :close_by_ESC, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
   attr :on_confirm, JS, default: %JS{}
 
@@ -66,12 +69,12 @@ defmodule ElixirCtfWeb.CoreComponents do
             <.focus_wrap
               id={"#{@id}-container"}
               phx-mounted={@show && show_modal(@id)}
-              phx-window-keydown={hide_modal(@on_cancel, @id)}
+              phx-window-keydown={if @close_by_ESC, do: hide_modal(@on_cancel, @id)}
               phx-key="escape"
-              phx-click-away={hide_modal(@on_cancel, @id)}
+              phx-click-away={if @close_by_clickaway, do: hide_modal(@on_cancel, @id)}
               class="hidden relative rounded-2xl bg-white p-14 shadow-lg shadow-zinc-700/10 ring-1 ring-zinc-700/10 transition"
             >
-              <div class="absolute top-6 right-5">
+              <div :if={@close_by_X_btn} class="absolute top-6 right-5">
                 <button
                   phx-click={hide_modal(@on_cancel, @id)}
                   type="button"
