@@ -117,6 +117,41 @@ defmodule ElixirCtfWeb.CPUComponents do
   end
 
   @doc """
+  Renders the modal to confirm result.
+  """
+  attr(:is_solving, :boolean)
+  attr(:unlocked, :boolean)
+  attr(:cpu_on, :boolean)
+
+  def confirm_modal(assigns) do
+    ~H"""
+    <%= if @is_solving do %>
+      <%= if @unlocked do %>
+        <.modal id="success-modal" show={true}>
+          <:title>Door Unlocked</:title>
+          Congratulation, you've solved the challenge!
+          Go back to the <.link navigate="/levels" class="font-semibold"> levels list </.link>
+          to solve the others.
+        </.modal>
+      <% end %>
+      <%= if !@unlocked and !@cpu_on do %>
+        <.modal id="failed-modal" show={true} close_by_X_btn={true}>
+          <:title>Not Accepted</:title>
+          The input is not correct! Please try again.
+        </.modal>
+      <% end %>
+    <% else %>
+      <%= if @unlocked do %>
+        <.modal id="success-modal-debug" show={true} close_by_X_btn={true}>
+          <:title>Door Unlocked</:title>
+          The input is correct! Now use Solve button to see if it works.
+        </.modal>
+      <% end %>
+    <% end %>
+    """
+  end
+
+  @doc """
   Renders the control panel.
   """
   attr(:cpu_on, :boolean)
@@ -128,6 +163,7 @@ defmodule ElixirCtfWeb.CPUComponents do
       <.button phx-click="run" disabled={!@cpu_on} title={run_tooltip(@cpu_on)}>Run</.button>
       <.button phx-click="reset" title="Reset the CPU">Reset</.button>
     </div>
+    <.button phx-click="solve" title="Solve the level on the real lock">Solve</.button>
     """
   end
 

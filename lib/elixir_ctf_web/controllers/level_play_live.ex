@@ -104,6 +104,8 @@ defmodule ElixirCtfWeb.LevelPlayLive do
       <.input_modal />
     <% end %>
 
+    <.confirm_modal is_solving={@is_solving} unlocked={@cpu.unlocked} cpu_on={@cpu_on} />
+
     <style>
       #code-<%= Integer.to_string(@pc, 16) |> String.upcase %>{color: red; font-weight: bold;}
       <%= for adr <- @breakpoints do %>
@@ -121,13 +123,23 @@ defmodule ElixirCtfWeb.LevelPlayLive do
   end
 
   def handle_event("step", _value, socket) do
-    cpu = CPU.exec_single(socket.assigns.cpu)
-    {:noreply, update_assign_for_cpu(socket, cpu)}
+    if socket.assigns.is_solving do
+      Logger.error("stepping not allowed in solve mode", assigns: socket.assigns)
+      {:noreply, socket}
+    else
+      cpu = CPU.exec_single(socket.assigns.cpu)
+      {:noreply, update_assign_for_cpu(socket, cpu)}
+    end
   end
 
   def handle_event("run", _value, socket) do
-    cpu = CPU.exec_continuously(socket.assigns.cpu, socket.assigns.breakpoints)
-    {:noreply, update_assign_for_cpu(socket, cpu)}
+    if socket.assigns.is_solving do
+      Logger.error("running not allowed in solve mode", assigns: socket.assigns)
+      {:noreply, socket}
+    else
+      cpu = CPU.exec_continuously(socket.assigns.cpu, socket.assigns.breakpoints)
+      {:noreply, update_assign_for_cpu(socket, cpu)}
+    end
   end
 
   def handle_event("provide_input", value, socket) do
@@ -143,7 +155,13 @@ defmodule ElixirCtfWeb.LevelPlayLive do
       {:ok, input} ->
         cpu = CPU.provide_input(socket.assigns.cpu, input)
 
-        {:noreply, update_assign_for_cpu(socket, cpu)}
+        if socket.assigns.is_solving do
+          # no breakpoints in solve mode
+          cpu = CPU.exec_continuously(cpu)
+          {:noreply, update_assign_for_cpu(socket, cpu)}
+        else
+          {:noreply, update_assign_for_cpu(socket, cpu)}
+        end
 
       _ ->
         Logger.error("invalid input", input: input, ishex: ishex)
@@ -170,6 +188,14 @@ defmodule ElixirCtfWeb.LevelPlayLive do
     end
   end
 
+  def handle_event("solve", _value, socket) do
+    id = socket.assigns.level.id
+    Logger.info("solve", id: id)
+
+    level = Level.get_level!(id)
+    {:noreply, setup_for_level(socket, level, true)}
+  end
+
   def handle_event("reset", _value, socket) do
     id = socket.assigns.level.id
 
@@ -177,11 +203,13 @@ defmodule ElixirCtfWeb.LevelPlayLive do
     {:noreply, setup_for_level(socket, level)}
   end
 
-  defp setup_for_level(socket, level) do
+  defp setup_for_level(socket, level, is_solving \\ false) do
     hex = String.split(level.hex, ~r{\n|\r\n}) |> Enum.filter(&(String.length(&1) > 0))
     {:ok, words} = IntelHex.load(hex, Memory.rom_start())
     mem = Memory.init(words)
     cpu = CPU.init(mem)
+
+    cpu = if is_solving, do: CPU.exec_continuously(cpu), else: cpu
 
     regex = ~r/^[[:blank:]]+(?<address>[0-9a-f]{4}):[[:blank:]]+/i
 
@@ -199,6 +227,7 @@ defmodule ElixirCtfWeb.LevelPlayLive do
       assign(socket,
         level: level,
         objdump: objdump,
+        is_solving: is_solving,
         breakpoints: breakpoints
       )
 

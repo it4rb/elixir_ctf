@@ -4,14 +4,15 @@ defmodule MSP430.CPU do
   alias MSP430.Instruction
   alias MSP430.Memory
 
-  defstruct [:memory, :ins_cnt, :stdout, :stdin, :require_input]
+  defstruct [:memory, :ins_cnt, :stdout, :stdin, :require_input, :unlocked]
 
   @type t :: %__MODULE__{
           memory: Memory.t(),
           ins_cnt: integer,
           stdout: String.t(),
           stdin: String.t(),
-          require_input: boolean()
+          require_input: boolean(),
+          unlocked: boolean()
         }
   @int_handle_adr 0xFF00
 
@@ -22,7 +23,8 @@ defmodule MSP430.CPU do
       ins_cnt: 0,
       stdout: "",
       stdin: "",
-      require_input: false
+      require_input: false,
+      unlocked: false
     }
   end
 
@@ -371,6 +373,11 @@ defmodule MSP430.CPU do
           mem = Memory.write_byte(mem, adr, 0)
           %{cpu | memory: mem, require_input: false}
         end
+
+      0x7F ->
+        # Interface with deadbolt to trigger an unlock if the password is correct.
+        # Takes no arguments.
+        %{cpu | unlocked: true}
     end
   end
 end

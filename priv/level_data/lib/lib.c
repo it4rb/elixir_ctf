@@ -16,3 +16,8 @@ int __attribute__((optimize("O1"))) putchar(int c)
   INT(0, c);
   return c;
 }
+
+void __attribute__((optimize("O1"))) unlock_door()
+{
+  INT(0x7f);
+}

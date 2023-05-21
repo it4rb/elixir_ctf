@@ -3,4 +3,6 @@
 
 void gets(char *buf, unsigned int length);
 
+void unlock_door();
+
 #endif

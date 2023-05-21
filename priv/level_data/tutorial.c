@@ -21,6 +21,7 @@ int main()
 
   if (check_password(pwd))
   {
+    unlock_door();
     puts("Access Granted!");
   }
   else
