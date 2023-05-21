@@ -4,12 +4,14 @@ defmodule MSP430.CPU do
   alias MSP430.Instruction
   alias MSP430.Memory
 
-  defstruct [:memory, :ins_cnt, :stdout]
+  defstruct [:memory, :ins_cnt, :stdout, :stdin, :require_input]
 
   @type t :: %__MODULE__{
           memory: Memory.t(),
           ins_cnt: integer,
-          stdout: String.t()
+          stdout: String.t(),
+          stdin: String.t(),
+          require_input: boolean()
         }
   @int_handle_adr 0xFF00
 
@@ -18,16 +20,24 @@ defmodule MSP430.CPU do
     %__MODULE__{
       memory: mem,
       ins_cnt: 0,
-      stdout: ""
+      stdout: "",
+      stdin: "",
+      require_input: false
     }
   end
 
   @spec is_on(t) :: boolean
   def is_on(cpu), do: (cpu.memory.sr &&& 0x10) == 0
 
+  @spec provide_input(t, String.t()) :: t
+  def provide_input(cpu, input) do
+    cpu = %{cpu | stdin: input}
+    if cpu.memory.pc == @int_handle_adr, do: handle_int(cpu), else: cpu
+  end
+
   @spec exec_continuously(t) :: t
   def exec_continuously(cpu) do
-    if is_on(cpu) do
+    if is_on(cpu) && !cpu.require_input do
       cpu = exec_single(cpu)
       exec_continuously(cpu)
     else
@@ -331,6 +341,33 @@ defmodule MSP430.CPU do
         # Takes one argument with the character to print.
         {_, c} = Memory.read_byte(cpu.memory, {:indexed, 1, 4})
         %{cpu | stdout: cpu.stdout <> <<c>>}
+
+      2 ->
+        # The gets interrupt: read a specific number of bytes to standard input.
+        # Takes two arguments. The first is the address to place the string, the
+        # second is the maximum number of bytes to read. Null bytes are not handled
+        # specially null-terminated.
+        if !cpu.require_input do
+          %{cpu | require_input: true}
+        else
+          {_, buf_adr} = Memory.read_word(cpu.memory, {:indexed, 1, 4})
+          {_, buf_len} = Memory.read_word(cpu.memory, {:indexed, 1, 6})
+
+          {mem, cnt} =
+            :binary.bin_to_list(cpu.stdin)
+            |> Enum.reduce_while({cpu.memory, 0}, fn c, {mem, cnt} ->
+              if cnt >= buf_len - 1 do
+                {:halt, {mem, cnt}}
+              else
+                adr = {:absolute, buf_adr + cnt &&& 0xFFFF}
+                {:cont, {Memory.write_byte(mem, adr, c), cnt + 1}}
+              end
+            end)
+
+          adr = {:absolute, buf_adr + cnt &&& 0xFFFF}
+          mem = Memory.write_byte(mem, adr, 0)
+          %{cpu | memory: mem, require_input: false}
+        end
     end
   end
 end
