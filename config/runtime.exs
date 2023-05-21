@@ -16,9 +16,8 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
-if System.get_env("PHX_SERVER") do
-  config :elixir_ctf, ElixirCtfWeb.Endpoint, server: true
-end
+
+config :elixir_ctf, ElixirCtfWeb.Endpoint, server: true
 
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
@@ -33,7 +32,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = System.get_env("APP_NAME") <> ".gigalixirapp.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :elixir_ctf, ElixirCtfWeb.Endpoint,
