@@ -55,7 +55,7 @@ defmodule ElixirCtfWeb.LevelPlayLive do
             <table>
               <tr>
                 <td>pc:</td>
-                <td id="pc"><%= to_hex(@pc) %></td>
+                <td id="pc" phx-hook="PC"><%= to_hex(@pc) %></td>
                 <td>sp:</td>
                 <td><%= to_hex(@sp) %></td>
                 <td>sr:</td>
@@ -99,6 +99,10 @@ defmodule ElixirCtfWeb.LevelPlayLive do
         </.box>
       </div>
     </div>
+
+    <style>
+      #code-<%= Integer.to_string(@pc, 16) |> String.upcase %>{color: red; font-weight: bold;}
+    </style>
     """
   end
 

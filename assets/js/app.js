@@ -22,8 +22,50 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+// https://stackoverflow.com/a/45411081
+function scrollChild(parent, child, padding) {
+  // Where is the parent on page
+  const parentRect = parent.getBoundingClientRect();
+  // What can you see?
+  const parentViewableArea = {
+    height: parent.clientHeight,
+    width: parent.clientWidth
+  };
+
+  // Where is the child
+  const childRect = child.getBoundingClientRect();
+  // Is the child viewable?
+  const isViewable = (childRect.top >= parentRect.top) && (childRect.top <= parentRect.top + parentViewableArea.height - 10);
+
+  // if you can't see the child try to scroll parent
+  if (!isViewable) {
+    // scroll by offset relative to parent
+    const offset = childRect.top - (parentRect.top + padding);
+    parent.scrollTop += offset;
+  }
+}
+
+function updateCurrentCodeLine(address) {
+  const line = document.getElementById("code-" + address);
+  if (line) {
+    scrollChild(document.getElementById("objdump"), line, 50);
+  }
+}
+
+let Hooks = {}
+Hooks.PC = {
+  mounted() {
+    const pc = this.el.firstChild.data;
+    updateCurrentCodeLine(pc);
+  },
+  updated() {
+    const pc = this.el.firstChild.data;
+    updateCurrentCodeLine(pc);
+  }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
