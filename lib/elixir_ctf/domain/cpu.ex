@@ -4,18 +4,21 @@ defmodule MSP430.CPU do
   alias MSP430.Instruction
   alias MSP430.Memory
 
-  defstruct [:memory, :ins_cnt]
+  defstruct [:memory, :ins_cnt, :stdout]
 
   @type t :: %__MODULE__{
           memory: Memory.t(),
-          ins_cnt: integer
+          ins_cnt: integer,
+          stdout: String.t()
         }
+  @int_handle_adr 0xFF00
 
   @spec init(Memory.t()) :: t
   def init(mem) do
     %__MODULE__{
       memory: mem,
-      ins_cnt: 0
+      ins_cnt: 0,
+      stdout: ""
     }
   end
 
@@ -38,7 +41,8 @@ defmodule MSP430.CPU do
     {mem, ins} = Instruction.fetch_ins(mem)
     Logger.debug(ins: ins)
     mem = exec_ins(mem, ins)
-    %{cpu | memory: mem, ins_cnt: cpu.ins_cnt + 1}
+    cpu = %{cpu | memory: mem, ins_cnt: cpu.ins_cnt + 1}
+    if mem.pc == @int_handle_adr, do: handle_int(cpu), else: cpu
   end
 
   @spec exec_ins(Memory.t(), Instruction.instruction()) :: Memory.t()
@@ -316,5 +320,17 @@ defmodule MSP430.CPU do
 
   defp exec_format3(mem, target, cond) do
     if cond, do: %{mem | pc: target}, else: mem
+  end
+
+  defp handle_int(cpu) do
+    {_, int_type} = Memory.read_word(cpu.memory, {:indexed, 1, 2})
+
+    case int_type do
+      0 ->
+        # The putchar interrupt: sends a single byte to the display.
+        # Takes one argument with the character to print.
+        {_, c} = Memory.read_byte(cpu.memory, {:indexed, 1, 4})
+        %{cpu | stdout: cpu.stdout <> <<c>>}
+    end
   end
 end
