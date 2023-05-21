@@ -75,6 +75,29 @@ defmodule MSP430.Memory do
           | {:indirect_auto_inc, reg_no()}
           | {:immediate, MSP430.word()}
 
+  @spec init(map) :: t
+  def init(rom) do
+    %__MODULE__{
+      pc: @rom_start,
+      sp: 0,
+      sr: 0,
+      r4: 0,
+      r5: 0,
+      r6: 0,
+      r7: 0,
+      r8: 0,
+      r9: 0,
+      r10: 0,
+      r11: 0,
+      r12: 0,
+      r13: 0,
+      r14: 0,
+      r15: 0,
+      rom: rom,
+      ram: %{}
+    }
+  end
+
   @spec read_raw_word(t(), MSP430.word()) :: MSP430.word()
   def read_raw_word(mem, addr) do
     Logger.debug(memory_access: Integer.to_string(addr, 16))

@@ -19,6 +19,19 @@ defmodule MSP430.CPU do
     }
   end
 
+  @spec is_on(t) :: boolean
+  def is_on(cpu), do: (cpu.memory.sr &&& 0x10) == 0
+
+  @spec exec_continuously(t) :: t
+  def exec_continuously(cpu) do
+    if is_on(cpu) do
+      cpu = exec_single(cpu)
+      exec_continuously(cpu)
+    else
+      cpu
+    end
+  end
+
   @spec exec_single(t) :: t
   def exec_single(cpu) do
     mem = cpu.memory
@@ -166,6 +179,33 @@ defmodule MSP430.CPU do
           mem = %{mem | sp: mem.sp - 2}
           mem = Memory.write_word(mem, {:indexed, 1, 0}, mem.pc)
           %{mem | pc: dst_val}
+
+        # format 3 (jump)
+        {:jeq, {:absolute, target}} ->
+          exec_format3(mem, target, Memory.get_flag(mem)[:z] == 1)
+
+        {:jne, {:absolute, target}} ->
+          exec_format3(mem, target, Memory.get_flag(mem)[:z] == 0)
+
+        {:jc, {:absolute, target}} ->
+          exec_format3(mem, target, Memory.get_flag(mem)[:c] == 1)
+
+        {:jnc, {:absolute, target}} ->
+          exec_format3(mem, target, Memory.get_flag(mem)[:c] == 0)
+
+        {:jn, {:absolute, target}} ->
+          exec_format3(mem, target, Memory.get_flag(mem)[:n] == 1)
+
+        {:jge, {:absolute, target}} ->
+          flags = Memory.get_flag(mem)
+          exec_format3(mem, target, Bitwise.bxor(flags[:n], flags[:v]) == 0)
+
+        {:jl, {:absolute, target}} ->
+          flags = Memory.get_flag(mem)
+          exec_format3(mem, target, Bitwise.bxor(flags[:n], flags[:v]) == 1)
+
+        {:jmp, {:absolute, target}} ->
+          exec_format3(mem, target, true)
       end
 
     mem
@@ -272,5 +312,9 @@ defmodule MSP430.CPU do
     else
       mem
     end
+  end
+
+  defp exec_format3(mem, target, cond) do
+    if cond, do: %{mem | pc: target}, else: mem
   end
 end
