@@ -33,9 +33,9 @@ defmodule MSP430.JumpTest do
       ins_cnt: 0
     }
 
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
 
     assert cpu == %CPU{
              memory: %Memory{
@@ -60,10 +60,10 @@ defmodule MSP430.JumpTest do
       ins_cnt: 0
     }
 
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
 
     assert cpu == %CPU{
              memory: %Memory{
@@ -105,9 +105,9 @@ defmodule MSP430.JumpTest do
       ins_cnt: 0
     }
 
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
 
     assert cpu == %CPU{
              memory: %Memory{
@@ -148,9 +148,9 @@ defmodule MSP430.JumpTest do
       ins_cnt: 0
     }
 
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
-    cpu = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
+    {:ok, cpu} = CPU.exec_single(cpu)
 
     assert cpu == %CPU{
              memory: %Memory{

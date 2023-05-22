@@ -25,16 +25,18 @@ defmodule MSP430.AdrModeTest do
       ins_cnt: 0
     }
 
-    assert CPU.exec_single(cpu) == %CPU{
-             memory: %Memory{
-               pc: 0x0FF18,
-               r5: 0x01080,
-               r6: 0x0108C,
-               rom: rom,
-               ram: TU.load_ram(%{0x01092 => 0x01234, 0x01082 => 0x01234})
-             },
-             ins_cnt: 1
-           }
+    assert CPU.exec_single(cpu) ==
+             {:ok,
+              %CPU{
+                memory: %Memory{
+                  pc: 0x0FF18,
+                  r5: 0x01080,
+                  r6: 0x0108C,
+                  rom: rom,
+                  ram: TU.load_ram(%{0x01092 => 0x01234, 0x01082 => 0x01234})
+                },
+                ins_cnt: 1
+              }}
   end
 
   test "adr mode: symbolic" do
@@ -51,10 +53,12 @@ defmodule MSP430.AdrModeTest do
       ins_cnt: 0
     }
 
-    assert CPU.exec_single(cpu) == %CPU{
-             memory: %Memory{pc: 0x0FF18, rom: rom, ram: TU.load_ram(%{0x01114 => 0x0A123})},
-             ins_cnt: 1
-           }
+    assert CPU.exec_single(cpu) ==
+             {:ok,
+              %CPU{
+                memory: %Memory{pc: 0x0FF18, rom: rom, ram: TU.load_ram(%{0x01114 => 0x0A123})},
+                ins_cnt: 1
+              }}
   end
 
   test "adr mode: absolute" do
@@ -71,10 +75,12 @@ defmodule MSP430.AdrModeTest do
       ins_cnt: 0
     }
 
-    assert CPU.exec_single(cpu) == %CPU{
-             memory: %{cpu.memory | pc: 0x0FF18, ram: TU.load_ram(%{0x01114 => 0x0A123})},
-             ins_cnt: 1
-           }
+    assert CPU.exec_single(cpu) ==
+             {:ok,
+              %CPU{
+                memory: %{cpu.memory | pc: 0x0FF18, ram: TU.load_ram(%{0x01114 => 0x0A123})},
+                ins_cnt: 1
+              }}
   end
 
   test "adr mode: indirect register" do
@@ -91,10 +97,12 @@ defmodule MSP430.AdrModeTest do
       ins_cnt: 0
     }
 
-    assert CPU.exec_single(cpu) == %CPU{
-             memory: %{cpu.memory | pc: 0x0FF18, ram: TU.load_ram(%{0x002A6 => 0x05B01})},
-             ins_cnt: 1
-           }
+    assert CPU.exec_single(cpu) ==
+             {:ok,
+              %CPU{
+                memory: %{cpu.memory | pc: 0x0FF18, ram: TU.load_ram(%{0x002A6 => 0x05B01})},
+                ins_cnt: 1
+              }}
   end
 
   test "adr mode: indirect auto increment" do
@@ -111,15 +119,17 @@ defmodule MSP430.AdrModeTest do
       ins_cnt: 0
     }
 
-    assert CPU.exec_single(cpu) == %CPU{
-             memory: %{
-               cpu.memory
-               | pc: 0x0FF18,
-                 r10: 0xFA34,
-                 ram: TU.load_ram(%{0x010A8 => 0x05BC1})
-             },
-             ins_cnt: 1
-           }
+    assert CPU.exec_single(cpu) ==
+             {:ok,
+              %CPU{
+                memory: %{
+                  cpu.memory
+                  | pc: 0x0FF18,
+                    r10: 0xFA34,
+                    ram: TU.load_ram(%{0x010A8 => 0x05BC1})
+                },
+                ins_cnt: 1
+              }}
   end
 
   test "adr mode: immediate" do
@@ -130,10 +140,12 @@ defmodule MSP430.AdrModeTest do
       ins_cnt: 0
     }
 
-    assert CPU.exec_single(cpu) == %CPU{
-             memory: %{cpu.memory | pc: 0x0FF18, ram: TU.load_ram(%{0x010A8 => 0x00045})},
-             ins_cnt: 1
-           }
+    assert CPU.exec_single(cpu) ==
+             {:ok,
+              %CPU{
+                memory: %{cpu.memory | pc: 0x0FF18, ram: TU.load_ram(%{0x010A8 => 0x00045})},
+                ins_cnt: 1
+              }}
   end
 
   test "byte mode 1" do

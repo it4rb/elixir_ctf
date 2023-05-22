@@ -9,6 +9,8 @@ defmodule ElixirCtfWeb.LevelPlayLive do
 
   use ElixirCtfWeb, :html
 
+  @max_ins_cnt_msg "Exceed maximum number of instructions, reset to continue"
+
   defp update_assign_for_cpu(assigns, cpu) do
     mem = cpu.memory
 
@@ -36,6 +38,7 @@ defmodule ElixirCtfWeb.LevelPlayLive do
 
   def render(assigns) do
     ~H"""
+    <.flash_group flash={@flash} />
     <div class="flex h-screen text-sm">
       <div class="w-1/2 m-2 space-y-2">
         <.box id="objdump" title="Disassembly" class="h-1/2 overflow-auto">
@@ -127,8 +130,10 @@ defmodule ElixirCtfWeb.LevelPlayLive do
       Logger.error("stepping not allowed in solve mode", assigns: socket.assigns)
       {:noreply, socket}
     else
-      cpu = CPU.exec_single(socket.assigns.cpu)
-      {:noreply, update_assign_for_cpu(socket, cpu)}
+      case CPU.exec_single(socket.assigns.cpu) do
+        {:ok, cpu} -> {:noreply, update_assign_for_cpu(socket, cpu)}
+        {:error, _} -> {:noreply, put_flash(socket, :error, @max_ins_cnt_msg)}
+      end
     end
   end
 
@@ -137,8 +142,10 @@ defmodule ElixirCtfWeb.LevelPlayLive do
       Logger.error("running not allowed in solve mode", assigns: socket.assigns)
       {:noreply, socket}
     else
-      cpu = CPU.exec_continuously(socket.assigns.cpu, socket.assigns.breakpoints)
-      {:noreply, update_assign_for_cpu(socket, cpu)}
+      case CPU.exec_continuously(socket.assigns.cpu, socket.assigns.breakpoints) do
+        {:ok, cpu} -> {:noreply, update_assign_for_cpu(socket, cpu)}
+        {:error, _} -> {:noreply, put_flash(socket, :error, @max_ins_cnt_msg)}
+      end
     end
   end
 
@@ -157,8 +164,10 @@ defmodule ElixirCtfWeb.LevelPlayLive do
 
         if socket.assigns.is_solving do
           # no breakpoints in solve mode
-          cpu = CPU.exec_continuously(cpu)
-          {:noreply, update_assign_for_cpu(socket, cpu)}
+          case CPU.exec_continuously(cpu) do
+            {:ok, cpu} -> {:noreply, update_assign_for_cpu(socket, cpu)}
+            {:error, _} -> {:noreply, put_flash(socket, :error, @max_ins_cnt_msg)}
+          end
         else
           {:noreply, update_assign_for_cpu(socket, cpu)}
         end
@@ -200,6 +209,7 @@ defmodule ElixirCtfWeb.LevelPlayLive do
     id = socket.assigns.level.id
 
     level = Level.get_level!(id)
+    socket = put_flash(socket, :error, nil)
     {:noreply, setup_for_level(socket, level)}
   end
 
@@ -209,7 +219,13 @@ defmodule ElixirCtfWeb.LevelPlayLive do
     mem = Memory.init(words)
     cpu = CPU.init(mem)
 
-    cpu = if is_solving, do: CPU.exec_continuously(cpu), else: cpu
+    cpu =
+      if is_solving do
+        {:ok, cpu} = CPU.exec_continuously(cpu)
+        cpu
+      else
+        cpu
+      end
 
     regex = ~r/^[[:blank:]]+(?<address>[0-9a-f]{4}):[[:blank:]]+/i
 

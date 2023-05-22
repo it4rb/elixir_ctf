@@ -36,7 +36,7 @@ defmodule MSP430.CallTest do
     {:ok, words} = IntelHex.load(hex, Memory.rom_start())
     mem = Memory.init(words)
     cpu = %CPU{memory: mem, ins_cnt: 0}
-    cpu = CPU.exec_continuously(cpu)
+    {:ok, cpu} = CPU.exec_continuously(cpu)
 
     assert CPU.is_on(cpu) == false
     assert cpu.memory.r15 == 12

@@ -43,7 +43,7 @@ defmodule MSP430.PutsTest do
     {:ok, words} = IntelHex.load(hex, Memory.rom_start())
     mem = Memory.init(words)
     cpu = CPU.init(mem)
-    cpu = CPU.exec_continuously(cpu)
+    {:ok, cpu} = CPU.exec_continuously(cpu)
 
     assert CPU.is_on(cpu) == false
     assert cpu.memory.r15 == 10

@@ -15,6 +15,7 @@ defmodule MSP430.CPU do
           unlocked: boolean()
         }
   @int_handle_adr 0xFF00
+  @max_ins_cnt 5000
 
   @spec init(Memory.t()) :: t
   def init(mem) do
@@ -37,27 +38,36 @@ defmodule MSP430.CPU do
     if cpu.memory.pc == @int_handle_adr, do: handle_int(cpu), else: cpu
   end
 
-  @spec exec_continuously(t, MapSet.t(integer)) :: t
+  @spec exec_continuously(t, MapSet.t(integer)) :: {:ok, t} | {:error, any}
   def exec_continuously(cpu, breakpoints \\ MapSet.new()) do
     if is_on(cpu) && !cpu.require_input do
-      cpu = exec_single(cpu)
+      case exec_single(cpu) do
+        {:ok, cpu} ->
+          if MapSet.member?(breakpoints, cpu.memory.pc),
+            do: {:ok, cpu},
+            else: exec_continuously(cpu, breakpoints)
 
-      if MapSet.member?(breakpoints, cpu.memory.pc),
-        do: cpu,
-        else: exec_continuously(cpu, breakpoints)
+        {:error, e} ->
+          {:error, e}
+      end
     else
-      cpu
+      {:ok, cpu}
     end
   end
 
-  @spec exec_single(t) :: t
+  @spec exec_single(t) :: {:ok, t} | {:error, any}
   def exec_single(cpu) do
-    mem = cpu.memory
-    {mem, ins} = Instruction.fetch_ins(mem)
-    Logger.debug(ins: ins)
-    mem = exec_ins(mem, ins)
-    cpu = %{cpu | memory: mem, ins_cnt: cpu.ins_cnt + 1}
-    if mem.pc == @int_handle_adr, do: handle_int(cpu), else: cpu
+    if cpu.ins_cnt >= @max_ins_cnt do
+      {:error, :max_ins_cnt}
+    else
+      mem = cpu.memory
+      {mem, ins} = Instruction.fetch_ins(mem)
+      Logger.debug(ins: ins)
+      mem = exec_ins(mem, ins)
+      cpu = %{cpu | memory: mem, ins_cnt: cpu.ins_cnt + 1}
+      cpu = if mem.pc == @int_handle_adr, do: handle_int(cpu), else: cpu
+      {:ok, cpu}
+    end
   end
 
   @spec exec_ins(Memory.t(), Instruction.instruction()) :: Memory.t()
